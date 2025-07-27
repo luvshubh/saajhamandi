@@ -1,21 +1,22 @@
-import axios from 'axios';
+import axios from "axios";
 
 // Check if we should use mock API to avoid network errors
-const USE_MOCK_API = false; // Set to true to use mock data instead of real API
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === "true";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // Local development API URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+console.log("API_BASE_URL:", API_BASE_URL); // Debugging line to check API base URL
 
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Add auth token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -27,9 +28,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -39,20 +40,24 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (credentials) => {
     if (USE_MOCK_API) {
-      return Promise.resolve({ data: { token: 'mock-token', user: { name: 'Mock User' } } });
+      return Promise.resolve({
+        data: { token: "mock-token", user: { name: "Mock User" } },
+      });
     }
-    return api.post('/api/auth/login', credentials);
+    return api.post("/api/auth/login", credentials);
   },
   register: (userData) => {
     if (USE_MOCK_API) {
-      return Promise.resolve({ data: { token: 'mock-token', user: { name: userData.name } } });
+      return Promise.resolve({
+        data: { token: "mock-token", user: { name: userData.name } },
+      });
     }
-    return api.post('/api/auth/register', userData);
+    return api.post("/api/auth/register", userData);
   },
   logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-  }
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  },
 };
 
 // Recommendations API
@@ -61,7 +66,7 @@ export const recommendationsAPI = {
     if (USE_MOCK_API) {
       return Promise.resolve({ data: [] });
     }
-    return api.get('/api/recommendations');
+    return api.get("/api/recommendations");
   },
 };
 
@@ -71,7 +76,7 @@ export const forecastAPI = {
     if (USE_MOCK_API) {
       return Promise.resolve({ data: {} });
     }
-    return api.post('/api/forecast', { item, city });
+    return api.post("/api/forecast", { item, city });
   },
 };
 
@@ -81,7 +86,7 @@ export const wholesalerAPI = {
     if (USE_MOCK_API) {
       return Promise.resolve({ data: [] });
     }
-    return api.post('/api/match-wholesalers', { items });
+    return api.post("/api/match-wholesalers", { items });
   },
 };
 
@@ -91,7 +96,7 @@ export const dealsAPI = {
     if (USE_MOCK_API) {
       return Promise.resolve({ data: [] });
     }
-    return api.get('/api/deals');
+    return api.get("/api/deals");
   },
 };
 
@@ -101,22 +106,24 @@ export const ordersAPI = {
     if (USE_MOCK_API) {
       return Promise.resolve({ data: [] });
     }
-    return api.get('/api/orders/my-orders');
+    return api.get("/api/orders/my-orders");
   },
   createOrder: (orderData) => {
     if (USE_MOCK_API) {
-      return Promise.resolve({ data: { id: 'mock-order-id', status: 'created' } });
+      return Promise.resolve({
+        data: { id: "mock-order-id", status: "created" },
+      });
     }
-    return api.post('/api/orders', orderData);
+    return api.post("/api/orders", orderData);
   },
 };
 
 export const fetchDashboardData = async () => {
   try {
-    const response = await fetch('/api/dashboard');
+    const response = await fetch("/api/dashboard");
     return await response.json();
   } catch (error) {
-    console.error('API Error:', error);
+    console.error("API Error:", error);
     return null;
   }
 };
